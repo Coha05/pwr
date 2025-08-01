@@ -69,6 +69,17 @@ fi
 echo "[5/6] Starting validator on $IP..."
 nohup sudo java --enable-native-access=ALL-UNNAMED -Xms1g -Xmx6g -jar validator.jar --ip "$IP" --password password &
 
-# === Finish ===
-echo "[6/6] Validator started successfully."
-echo "Monitor logs with: tail -n 1000 -f nohup.out"
+# === Finish and verify version ===
+echo "[6/6] Validator started. Waiting 5 seconds for startup..."
+sleep 5
+
+echo -n "[INFO] Verifying running validator version... "
+VERSION_CHECK=$(curl -s localhost:8085/version || echo "Unavailable")
+
+if [[ "$VERSION_CHECK" == "$VERSION" ]]; then
+  echo "✅ Version $VERSION is running successfully."
+else
+  echo "⚠️  Expected $VERSION but got: $VERSION_CHECK"
+  echo "      - The validator may still be starting or failed to launch."
+  echo "      - Check logs: tail -n 1000 -f nohup.out"
+fi
